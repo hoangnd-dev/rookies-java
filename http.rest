@@ -1,0 +1,17 @@
+@host=http://localhost:8080/api/v1
+
+
+### Login
+POST {{host}}/auth/signin
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "apass"
+}
+
+### ME
+GET {{host}}/me 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJuYW1lIjoiYWRtaW4iLCJleHAiOjE3MTUxODQ4NTl9.p1NBoquTgsFGAYqgepvYyr-lbiYcQac1kwrMBzCFp1s
+
+### Another

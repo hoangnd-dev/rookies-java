@@ -1,0 +1,6 @@
+--insert
+--into
+--    AUTHORS
+--    (DATE_CREATED, DATE_MODIFIED, EMAIL, AUTHOR_NAME)
+--valueS
+--    (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'email1@email.com', 'author1')

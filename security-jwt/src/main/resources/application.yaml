@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        generate_statistics: none
+    open-in-view: false
+logging:
+  level:
+    org.hibernate.stat: info
+    org.springframework.security: DEBUG
+
+security:
+  jwt:
+    token:
+      secret-key: ${JWT_SECRET}
+
+server:
+  servlet:
+    context-path: /api
+admin:
+  default:
+    pass: ${ADMIN_PASS}
