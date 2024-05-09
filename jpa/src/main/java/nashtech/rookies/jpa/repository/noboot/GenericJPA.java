@@ -1,23 +1,23 @@
 package nashtech.rookies.jpa.repository.noboot;
 
-import java.lang.reflect.ParameterizedType;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import lombok.extern.log4j.Log4j2;
+import nashtech.rookies.jpa.entity.IdEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.ParameterizedType;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 @Log4j2
 @NoRepositoryBean
-public abstract class GenericJPA<T, ID> {
+public abstract class GenericJPA<T extends IdEntity<?>, ID> {
 
 
     @PersistenceContext
@@ -31,30 +31,35 @@ public abstract class GenericJPA<T, ID> {
     private final Class<T> clazz;
 
     @SuppressWarnings("unchecked")
-    GenericJPA () {
+    GenericJPA() {
         var type = getClass().getGenericSuperclass();
         ParameterizedType p = (ParameterizedType) type;
         this.clazz = (Class<T>) (p.getActualTypeArguments()[0]);
     }
 
     @PostConstruct
-    void init () {
+    void init() {
         transactionTemplate = new TransactionTemplate(this.transactionManager);
     }
 
-    public Optional<T> findOneById (ID id) {
+    public Optional<T> findOneById(ID id) {
         return Optional.ofNullable(em.find(this.clazz, id));
     }
 
-    public <S extends T> S save (S entity) {
+    public <S extends T> S save(S entity) {
         return doInTransaction(entityManager -> {
-            em.persist(entity);
+            if (entity.isNew()) {
+                em.persist(entity);
+
+            } else {
+                entityManager.merge(entity);
+            }
             return entity;
         });
 
     }
 
-    public List<T> getAll () {
+    public List<T> getAll() {
         var cb = em.getCriteriaBuilder();
         var cr = cb.createQuery(this.clazz);
         var from = cr.from(this.clazz);
@@ -63,51 +68,59 @@ public abstract class GenericJPA<T, ID> {
     }
 
 
-    public <S extends T> S doInTransaction (Function<EntityManager, S> func) {
+    public <S extends T> S doInTransaction(Function<EntityManager, S> func) {
         return transactionTemplate.execute(status -> func.apply(em));
     }
 
-    public <S extends T> Iterable<S> saveAll (Iterable<S> entities) {
+    public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
         return null;
     }
 
-    public Optional<T> findById (ID aLong) {
+    public Optional<T> findById(ID aLong) {
         return Optional.ofNullable(em.find(this.clazz, aLong));
     }
 
-    public boolean existsById (ID aLong) {
+    public boolean existsById(ID aLong) {
         return findById(aLong).isPresent();
     }
 
-    public Iterable<T> findAll () {
+    public Iterable<T> findAll() {
         return this.getAll();
     }
 
-    public Iterable<T> findAllById (Iterable<ID> longs) {
+    public Iterable<T> findAllById(Iterable<ID> longs) {
         return null;
     }
 
-    public long count () {
+    public long count() {
         return 0;
     }
 
-    public void deleteById (ID aLong) {
-        delete(findById(aLong).orElseThrow());
-    }
-
-    public void delete (T entity) {
-        em.remove(entity);
-    }
-
-    public void deleteAllById (Iterable<? extends ID> longs) {
+    public void deleteById(ID aLong) {
+        doInTransaction(entityManager -> {
+            delete(findById(aLong).orElseThrow());
+            return null;
+        });
 
     }
 
-    public void deleteAll (Iterable<? extends T> entities) {
+    public void delete(T entity) {
+        doInTransaction(entityManager -> {
+            entityManager.remove(entity);
+            return null;
+        });
 
     }
 
-    public void deleteAll () {
+    public void deleteAllById(Iterable<? extends ID> longs) {
+
+    }
+
+    public void deleteAll(Iterable<? extends T> entities) {
+
+    }
+
+    public void deleteAll() {
 
     }
 

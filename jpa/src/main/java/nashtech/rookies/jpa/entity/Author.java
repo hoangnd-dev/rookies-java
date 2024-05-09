@@ -1,22 +1,13 @@
 package nashtech.rookies.jpa.entity;
 
-import java.util.Set;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "AUTHORS")
@@ -32,11 +23,7 @@ public class Author extends AuditEntity<Long> {
     @Email
     String email;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "AUTHORS_BOOKS",
-        joinColumns = @JoinColumn(name = "AUTHOR_ID"),
-        inverseJoinColumns = @JoinColumn(name = "BOOK_ID"))
+    @ManyToMany(mappedBy = "authors")
     Set<Book> books;
 
 
@@ -46,8 +33,6 @@ public class Author extends AuditEntity<Long> {
     @Version
     @Getter(AccessLevel.NONE)
     private int version;
-
-
 
 
 }

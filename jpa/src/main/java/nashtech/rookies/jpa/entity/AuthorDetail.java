@@ -21,7 +21,7 @@ import lombok.ToString;
 @Setter
 public class AuthorDetail extends IdEntity<Long> {
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "AUTHOR_ID", foreignKey = @ForeignKey(name = "AUTHORS_ID_FK"))
     @ToString.Exclude
     Author author;

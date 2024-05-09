@@ -12,6 +12,6 @@ Content-Type: application/json
 
 ### ME
 GET {{host}}/me 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJuYW1lIjoiYWRtaW4iLCJleHAiOjE3MTUxODQ4NTl9.p1NBoquTgsFGAYqgepvYyr-lbiYcQac1kwrMBzCFp1s
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJuYW1lIjoiYWRtaW4iLCJleHAiOjE3MTUyNjUyMTN9.apkqpdOPYyBTjv3uPnRJ_GrjR4voODGsQucIp988J0U
 
 ### Another

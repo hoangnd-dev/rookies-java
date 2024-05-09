@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -58,6 +59,11 @@ public class AppConfig {
         HikariDataSource hikariDataSource = new HikariDataSource(config);
         autoCloseables.add(hikariDataSource);
         return hikariDataSource;
+    }
+
+    @Bean
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
     }
 
 

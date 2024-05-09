@@ -2,16 +2,7 @@ package nashtech.rookies.jpa.entity;
 
 import java.util.Set;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.SecondaryTable;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -28,13 +19,17 @@ public class Book extends AuditEntity<Long> {
     @Column(name = "BOOK_NAME", nullable = false)
     String name;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "BOOK_ID", foreignKey = @ForeignKey(name = "PAGE_BOOK_FK"))
     Set<Page> pages;
 
-    @ManyToMany(mappedBy = "books")
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "AUTHORS_BOOKS",
+            joinColumns = @JoinColumn(name = "BOOK_ID"),
+            inverseJoinColumns = @JoinColumn(name = "AUTHOR_ID"))
     Set<Author> authors;
 
     @Column(name = "BOOK_COVER", table = "BOOKS_DETAIL")

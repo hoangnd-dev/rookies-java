@@ -11,4 +11,6 @@ public interface Service<T, ID> {
 
 
     Iterable<T> findAll ();
+
+    void delete(ID id);
 }

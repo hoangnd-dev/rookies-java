@@ -22,12 +22,7 @@ import lombok.NoArgsConstructor;
 @MappedSuperclass
 @NoArgsConstructor
 @Getter
-public abstract class AuditEntity<P extends Serializable> implements Persistable<P> {
-
-    @Id
-    @GeneratedValue
-    @EqualsAndHashCode.Include
-    private P id;
+public abstract class AuditEntity<P extends Serializable> extends IdEntity<P> implements Persistable<P> {
 
     @Column(name = "DATE_CREATED")
     @CreatedDate

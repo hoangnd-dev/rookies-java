@@ -31,4 +31,9 @@ public abstract class ServiceImpl<T, ID> implements Service<T, ID> {
     public Iterable<T> findAll () {
         return this.repository.findAll();
     }
+
+    @Override
+    public void delete(ID id) {
+        this.repository.deleteById(id);
+    }
 }
