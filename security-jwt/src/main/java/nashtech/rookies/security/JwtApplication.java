@@ -42,7 +42,7 @@ public class JwtApplication {
         AuthorService authorService,
         RoleRepository roleRepository) {
         return args -> {
-            var rolesDefault = List.of("USER", "ADMIN");
+            var rolesDefault = List.of("ROLE_USER", "ROLE_ADMIN");
             List<Role> roles = rolesDefault.stream()
                 .map(r -> Role.builder().roleName(r).build())
                 .map(roleRepository::save)
@@ -52,6 +52,10 @@ public class JwtApplication {
             var u1 = new SignUpDto("admin", initPass, rolesDefault);
             var u2 = userService.signUp(u1);
             System.out.println(u2);
+
+            var user = new SignUpDto("user", initPass, List.of("ROLE_USER"));
+            var userDb = userService.signUp(user);
+            System.out.println(userDb);
 
             Author author = new Author();
             author.setEmail("tech@yahoo.com");

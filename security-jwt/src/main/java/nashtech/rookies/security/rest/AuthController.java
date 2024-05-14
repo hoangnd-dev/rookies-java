@@ -41,13 +41,6 @@ public class AuthController extends V1Rest {
     }
 
 
-    @PostMapping(path = "/auth/signin",
-        consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE },
-        produces = { MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<JwtToken> loginForm (@ModelAttribute SignInDto loginRequest) {
-        return this.signIn(loginRequest);
-    }
-
     @GetMapping("/me")
     ResponseEntity<String> me (Authentication authentication) {
         if (authentication.getPrincipal() instanceof User user) {

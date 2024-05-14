@@ -28,3 +28,8 @@ server:
 admin:
   default:
     pass: ${ADMIN_PASS}
+
+
+springdoc:
+  api-docs:
+    path: /api-docs
