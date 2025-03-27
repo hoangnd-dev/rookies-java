@@ -1,0 +1,20 @@
+[
+  {
+    "first_name": "Tu",
+    "last_name": "Tran",
+    "id_card": "112233",
+    "assets": [
+      {
+        "asset_name": "asset_name1"
+      },
+      {
+        "asset_name": "asset_name2"
+      }
+    ]
+  },
+  {
+    "first_name": "Hoa",
+    "last_name": "Tran",
+    "id_card": "112233"
+  }
+]

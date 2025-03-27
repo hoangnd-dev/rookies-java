@@ -1,96 +1,109 @@
 package nashtech.rookies.jpa;
 
 
-import nashtech.rookies.jpa.config.ApplicationBoot;
-import nashtech.rookies.jpa.entity.Author;
-import nashtech.rookies.jpa.entity.AuthorDetail;
-import nashtech.rookies.jpa.entity.Book;
-import nashtech.rookies.jpa.service.AuthorService;
-import nashtech.rookies.jpa.service.BookService;
-import lombok.extern.log4j.Log4j2;
+import java.util.List;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import nashtech.rookies.jpa.config.ApplicationBoot;
+import nashtech.rookies.jpa.entity.Gender;
+import nashtech.rookies.jpa.entity.UserEntity;
+import nashtech.rookies.jpa.entity.UserProfileEntity;
+import nashtech.rookies.jpa.repository.UserRepository;
+import nashtech.rookies.jpa.service.RoleService;
+import nashtech.rookies.jpa.service.UserService;
 
 @Log4j2
+@RequiredArgsConstructor
 public class JPAApp {
 
-    private final BookService bookService;
-    private final AuthorService authorService;
-    private final JdbcTemplate jdbcTemplate;
+    private final RoleService    roleService;
+    private final JdbcTemplate   jdbcTemplate;
+    private final UserService    userService;
+    private final UserRepository userRepository;
 
-    public JPAApp(BookService bookService, AuthorService authorService, JdbcTemplate jdbcTemplate) {
-        this.bookService = bookService;
-        this.authorService = authorService;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
-    void showBookRelation(Long id) {
-        var authorName = jdbcTemplate.query("SELECT author_id,book_id FROM authors_books where book_id=?",
-                (RowMapper<Object>) (rs, rowNum) -> rs.getNString("author_id")
-                ,
-                id
+    void showBookRelation (Long id) {
+        var authorName = jdbcTemplate.query(
+            "SELECT author_id,book_id FROM authors_books where book_id=?",
+            (RowMapper<Object>) (rs, rowNum) -> rs.getNString("author_id")
+            ,
+            id
         );
         log.info("author_id: {}, book_id: {}", authorName, id);
     }
 
-    void showAuthorInfo(Long id) {
-        var authorName = jdbcTemplate.query("SELECT author_name FROM authors where id=?",
-                (RowMapper<Object>) (rs, rowNum) -> rs.getNString("author_name"),
-                id);
+    void showAuthorInfo (Long id) {
+        var authorName = jdbcTemplate.query(
+            "SELECT author_name FROM authors where id=?",
+            (RowMapper<Object>) (rs, rowNum) -> rs.getNString("author_name"),
+            id
+        );
         log.info("author name: {}", authorName);
-        var authorAddress = jdbcTemplate.query("SELECT address FROM authors_detail where author_id=?",
-                (RowMapper<Object>) (rs, rowNum) -> rs.getNString("address"),
-                id);
+        var authorAddress = jdbcTemplate.query(
+            "SELECT address FROM authors_detail where author_id=?",
+            (RowMapper<Object>) (rs, rowNum) -> rs.getNString("address"),
+            id
+        );
         log.info("detail address: {}", authorAddress);
 
     }
 
-    public void run(String[] args) {
+    public void run (String[] args) {
+        var user = UserEntity
+            .builder()
+            .userName("james")
+            .password("password")
+            .email("james@gmail.com")
+            .avatar("Byte Array Demo".getBytes())
+            .disabled(true)
+            .build();
 
-//        Author author = new Author();
-//        author.setEmail("tech@yahoo.com");
-//        author.setName("this ny my name");
-//        AuthorDetail authorDetail = new AuthorDetail();
-//        authorDetail.setAddress("address");
-//        authorDetail.setAuthor(author);
-//        author.setAuthorDetail(authorDetail);
-//        authorService.save(author);
-//        showAuthorInfo(author.getId());
-//        authorService.delete(author.getId());
-//        showAuthorInfo(author.getId());
-//
-//
-        var author2 = new Author();
-        author2.setEmail("tech1@yahoo.com");
-        author2.setName("this ny my name 2");
-        authorService.save(author2);
-        log.info("author id: {}", author2.getId());
+        var userInDb = userService.save(user);
+
+        var db = userRepository.findById(userInDb.getId()).get();
+        var b1 = db.getAvatar();
+        System.out.println(new String(b1));
+        var authorName = jdbcTemplate.query(
+            "SELECT users.user_name,users.disabled,users.version, users_ext.user_avatar FROM users left join " +
+            "users_ext on users_ext.id = users.id " +
+            "where users.id=?",
+            (rs, rowNum) ->
+                List.of(
+                    rs.getNString("disabled"),
+                    rs.getNString("user_name"),
+                    rs.getLong("version"),
+                    new String(rs.getBytes("user_avatar"))
+                )
+            ,
+            userInDb.getId()
+        );
+        log.info("db2: {}, userId: {}", authorName, userInDb.getId());
+        var userProfile = UserProfileEntity
+            .builder()
+            .profileName("PROFILE NAME")
+            .user(userInDb)
+            .gender(Gender.MALE)
+            .build();
+
+        userService.save(userProfile);
+        var authorName1 = jdbcTemplate.query(
+            "SELECT profile_name,gender FROM users_profile where user_id=?",
+            (RowMapper<Object>) (rs, rowNum) ->
+                List.of(rs.getNString("profile_name"), rs.getNString("gender"))
+            ,
+            userInDb.getId()
+        );
+        log.info("db: {}, userId: {}", authorName1, userInDb.getId());
 
 
-
-//        log.info(this.bookService);
-        var book2 = new Book();
-        book2.setName("Book2");
-        bookService.save(book2);
-        log.info("book id {}", book2.getId());
-
-//        book.setAuthors(Set.of(author2));
-        book2.getAuthors().add(author2);
-
-        bookService.save(book2);
-        log.info("book id {}", book2.getId());
-        showBookRelation(book2.getId());
-//        book.setAuthors(
-//        var a = this.bookService.findAll();
-//        a.forEach(e -> log.info(e.getId()));
     }
 
 
-    public static void main(String[] args) {
+    public static void main (String[] args) {
         ApplicationBoot.with(JPAApp.class).run(args);
     }
 }

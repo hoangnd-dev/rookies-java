@@ -16,9 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import lombok.extern.log4j.Log4j2;
 import nashtech.rookies.jpa.SpringDataApplication;
-import nashtech.rookies.jpa.entity.Author;
-import nashtech.rookies.jpa.entity.AuthorDetail;
-import nashtech.rookies.jpa.service.AuthorService;
+import nashtech.rookies.jpa.service.RoleService;
 import nashtech.rookies.security.dto.SignUpDto;
 import nashtech.rookies.security.entity.Role;
 import nashtech.rookies.security.repository.RoleRepository;
@@ -39,7 +37,7 @@ public class JwtApplication {
     CommandLineRunner commandLineRunner (
         @Value("${admin.default.pass}") String initPass,
         UserService userService,
-        AuthorService authorService,
+        RoleService roleService,
         RoleRepository roleRepository) {
         return args -> {
             var rolesDefault = List.of("ROLE_USER", "ROLE_ADMIN");
@@ -57,16 +55,16 @@ public class JwtApplication {
             var userDb = userService.signUp(user);
             System.out.println(userDb);
 
-            Author author = new Author();
-            author.setEmail("tech@yahoo.com");
-            author.setName("this ny my name");
-            AuthorDetail authorDetail = new AuthorDetail();
-            authorDetail.setAddress("address");
-//        authorDetail.setAuthor(author);
-            author.setAuthorDetail(authorDetail);
-            authorService.save(author);
-            log.info(author.getId());
-            log.info(author.getAuthorDetail().getAddress());
+//            Author author = new Author();
+//            author.setEmail("tech@yahoo.com");
+//            author.setName("this ny my name");
+//            AuthorDetail authorDetail = new AuthorDetail();
+//            authorDetail.setAddress("address");
+////        authorDetail.setAuthor(author);
+//            author.setAuthorDetail(authorDetail);
+//            roleService.save(author);
+//            log.info(author.getId());
+//            log.info(author.getAuthorDetail().getAddress());
 
         };
     }

@@ -18,8 +18,7 @@ public abstract class ServiceImpl<T, ID> implements Service<T, ID> {
     @Override
     @Transactional
     public T save (T entity) {
-        this.repository.save(entity);
-        return entity;
+        return this.repository.save(entity);
     }
 
     @Override

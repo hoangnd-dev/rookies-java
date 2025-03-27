@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import nashtech.rookies.jpa.entity.UserEntity;
+import nashtech.rookies.jpa.entity.UserProfileEntity;
 import nashtech.rookies.jpa.repository.RoleRepository;
+import nashtech.rookies.jpa.repository.UserProfileRepository;
 import nashtech.rookies.jpa.repository.UserRepository;
 import nashtech.rookies.jpa.repository.boot.UserRepositoryBoot;
 import nashtech.rookies.jpa.service.UserService;
@@ -24,13 +26,15 @@ public class UserServiceImpl extends ServiceImpl<UserEntity, UUID> implements Us
     private final UserRepository  userRepository;
     private final RoleRepository  roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserProfileRepository userProfileRepository;
 
     public UserServiceImpl (UserRepository userRepository, RoleRepository roleRepository,
-                            PasswordEncoder passwordEncoder) {
+                            PasswordEncoder passwordEncoder, UserProfileRepository userProfileRepository) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userProfileRepository = userProfileRepository;
     }
 
     @Override
@@ -70,6 +74,11 @@ public class UserServiceImpl extends ServiceImpl<UserEntity, UUID> implements Us
             return userRepositoryBoot.findAll(example);
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public UserProfileEntity save (UserProfileEntity userProfileEntity) {
+        return this.userProfileRepository.save(userProfileEntity);
     }
 
 }

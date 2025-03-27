@@ -33,3 +33,5 @@ build/
 .vscode/
 .env
 *.iml
+*.env*
+!.env.sample

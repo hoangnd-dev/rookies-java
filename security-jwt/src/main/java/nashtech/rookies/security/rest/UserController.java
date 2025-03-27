@@ -16,12 +16,12 @@ import nashtech.rookies.jpa.service.UserService;
 import nashtech.rookies.security.dto.BookDto;
 
 @RestController
-public class BookController extends V1Rest {
+public class UserController extends V1Rest {
 
     private final UserService userService;
     private final RoleService roleService;
 
-    public BookController (UserService userService, RoleService roleService) {
+    public UserController (UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
     }
@@ -45,21 +45,21 @@ public class BookController extends V1Rest {
         var bookDtos = new LinkedList<BookDto>();
         for (var book : books) {
             // if we build the list authors IDs here, the error no session will be occurred, how we can handle it
-            bookDtos.add(new BookDto(book.getId(), book.getName(), book.getCover(), List.of()));
+//            bookDtos.add(new BookDto(book.getId(), book.getName(), book.getCover(), List.of()));
         }
         return ResponseEntity.ok(bookDtos);
 
     }
 
-    @PutMapping("/books/{bookId}")
-    @RolesAllowed("ROLE_ADMIN")
-    ResponseEntity<BookDto> updateBook (@PathVariable("bookId") Long bookId, @RequestBody BookDto bookDto) {
-        return bookService.findOne(bookId)
-            .map(e -> {
-                // we need add validate and update at here
-                return ResponseEntity.ok(new BookDto(e.getId(), e.getName(), e.getCover(), List.of()));
-            })
-            .orElseGet(() -> ResponseEntity.notFound().build());
-
-    }
+//    @PutMapping("/books/{bookId}")
+//    @RolesAllowed("ROLE_ADMIN")
+//    ResponseEntity<BookDto> updateBook (@PathVariable("bookId") Long bookId, @RequestBody BookDto bookDto) {
+//        return bookService.findOne(bookId)
+//            .map(e -> {
+//                // we need add validate and update at here
+//                return ResponseEntity.ok(new BookDto(e.getId(), e.getName(), e.getCover(), List.of()));
+//            })
+//            .orElseGet(() -> ResponseEntity.notFound().build());
+//
+//    }
 }

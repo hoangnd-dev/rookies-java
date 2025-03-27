@@ -1,6 +1,5 @@
 package nashtech.rookies.jpa.entity;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -19,13 +18,18 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.SecondaryTable;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,61 +41,75 @@ import lombok.ToString;
 
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "USERS")
+@Table(name = "users")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @ToString
-@SecondaryTable(name = "USERS_EXT", pkJoinColumns = @PrimaryKeyJoinColumn(name = "ID"))
+@SecondaryTable(name = "users_ext", pkJoinColumns = @PrimaryKeyJoinColumn(name = "id"))
+@NamedEntityGraphs(
+    value = {
+        @NamedEntityGraph(name = UserEntity.WITH_RULES_GRAPH,
+                          attributeNodes = @NamedAttributeNode("roles")),
+        @NamedEntityGraph(name = UserEntity.WITH_RULES_PROFILE,
+                          attributeNodes = @NamedAttributeNode("profile"))
+    }
+)
 public class UserEntity extends AuditEntity<UUID> {
+
+    public static final String WITH_RULES_GRAPH   = "graph.User.roles";
+    public static final String WITH_RULES_PROFILE = "graph.User.profiles";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
-    @Column(name = "ID")
+    @Column(name = "id")
     private UUID id;
 
-    @Column(name = "USER_NAME", length = 36, updatable = false, unique = true)
+    @Column(name = "user_name", length = 36, updatable = false, unique = true)
     private String userName;
 
-    @Column(name = "PASSWORD", length = 1024, nullable = false)
+    @Column(name = "password", length = 1024, nullable = false)
     @ToString.Exclude
     private String password;
-    @Column(name = "EMAIL", length = 1024, nullable = false, unique = true)
+    @Column(name = "email", length = 1024, nullable = false, unique = true)
     //    Validator
     @Email
     private String email;
 
-    @Column(name = "LAST_NAME", length = 100)
+    @Column(name = "last_name", length = 100)
     private String lastName;
-    @Column(name = "FIRST_NAME", length = 100)
+    @Column(name = "first_name", length = 100)
     private String firstName;
+
 
     @Builder.Default
     @Convert(converter = BooleanToYNConverter.class)
-    @Column(name = "DISABLED", length = 3)
+    @Column(name = "disabled", length = 3)
     private Boolean disabled = false;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
+    @NotEmpty
     private Set<UserProfileEntity> profiles;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @JoinColumn(name = "department_id")
     private DepartmentEntity department;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
+    @ToString.Exclude
     @JoinTable(
         name = "user_role",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<RoleEntity> roles;
 
-    @Column(name = "USER_AVATAR", table = "USERS_EXT")
+    @Column(name = "user_avatar", table = "users_ext", columnDefinition = "bytea")
     @Lob
     @Basic(fetch = FetchType.LAZY)
     @ToString.Exclude
@@ -102,17 +120,6 @@ public class UserEntity extends AuditEntity<UUID> {
     @Builder.Default
     long version = 1;
 
-
-    public byte[] getAvatar () {
-        if ( this.avatar != null && this.avatar.length > 0 ) {
-            return Arrays.copyOf(this.avatar, this.avatar.length);
-        }
-        return new byte[0];
-    }
-
-    public void setAvatar (byte[] data) {
-        this.avatar = Arrays.copyOf(data, data.length);
-    }
 
     // Transient
     @Transient

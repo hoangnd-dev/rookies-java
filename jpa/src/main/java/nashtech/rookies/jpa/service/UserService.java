@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import nashtech.rookies.jpa.entity.UserEntity;
+import nashtech.rookies.jpa.entity.UserProfileEntity;
 
 @org.springframework.stereotype.Service
 public interface UserService extends Service<UserEntity, UUID> {
@@ -15,4 +16,6 @@ public interface UserService extends Service<UserEntity, UUID> {
     List<UserEntity> findOneByNameSpecification(String name);
 
     List<UserEntity> findOneByNameExample(String name);
+
+    UserProfileEntity save(UserProfileEntity userProfileEntity);
 }

@@ -23,8 +23,10 @@ import jakarta.persistence.Persistence;
 import jakarta.persistence.ValidationMode;
 import lombok.SneakyThrows;
 import nashtech.rookies.jpa.repository.RoleRepository;
+import nashtech.rookies.jpa.repository.UserProfileRepository;
 import nashtech.rookies.jpa.repository.UserRepository;
 import nashtech.rookies.jpa.repository.noboot.RoleRepositoryNoBoot;
+import nashtech.rookies.jpa.repository.noboot.UserProfileRepositoryNoBoot;
 import nashtech.rookies.jpa.repository.noboot.UserRepositoryNoBoot;
 import nashtech.rookies.jpa.service.RoleService;
 import nashtech.rookies.jpa.service.UserService;
@@ -51,10 +53,10 @@ public class AppConfig {
     @Bean
     DataSource dataSource (Dotenv dotenv) {
         var config = new HikariConfig();
-        config.setJdbcUrl(dotenv.get("h2.datasource.url"));
-        config.setUsername(dotenv.get("h2.datasource.username"));
-        config.setPassword(dotenv.get("h2.datasource.password"));
-        config.setDriverClassName(dotenv.get("h2.datasource.driverClassName"));
+        config.setJdbcUrl(dotenv.get("datasource.url"));
+        config.setUsername(dotenv.get("datasource.username"));
+        config.setPassword(dotenv.get("datasource.password"));
+        config.setDriverClassName(dotenv.get("datasource.driverClassName"));
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
@@ -84,7 +86,6 @@ public class AppConfig {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
-
     @SneakyThrows
     private void closeObject (AutoCloseable closeable) {
         closeable.close();
@@ -101,6 +102,11 @@ public class AppConfig {
     }
 
     @Bean
+    UserProfileRepository userProfileRepository () {
+        return new UserProfileRepositoryNoBoot();
+    }
+
+    @Bean
     RoleService roleService () {
         return new RoleServiceImpl(roleRepository());
     }
@@ -112,7 +118,7 @@ public class AppConfig {
 
     @Bean
     UserService userService () {
-        return new UserServiceImpl(userRepository(), roleRepository(), passwordEncoder());
+        return new UserServiceImpl(userRepository(), roleRepository(), passwordEncoder(), userProfileRepository());
     }
 
 }

@@ -36,9 +36,8 @@ public class AuthConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider (UserDetailsService userService) {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(passwordEncoder());
         authProvider.setUserDetailsService(userService);
-        authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
 
@@ -56,14 +55,13 @@ public class AuthConfig {
                                 .bearerFormat("JWT")));
     }
 
-
-
     @Bean
     SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity,
                                              JwtAuthenticationFilter authFilter) throws Exception {
         return httpSecurity
             .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(
+                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(
                     "/swagger-ui.html"
@@ -71,7 +69,7 @@ public class AuthConfig {
                     ,"/api-docs/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.POST, "/v1/auth/*").permitAll()
-                .requestMatchers(HttpMethod.POST, "/v1/books").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/v1/admin").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
             .build();

@@ -13,16 +13,10 @@ import lombok.Getter;
 
 @MappedSuperclass
 @Getter
-public abstract class IdEntity<P extends Serializable> implements Persistable<P> {
+public abstract class IdEntity<P extends Serializable> implements EntityBase<P> {
     @Id
     @GeneratedValue
     @EqualsAndHashCode.Include
     private P id;
-
-    @Transient
-    @Override
-    public boolean isNew () {
-        return null == getId();
-    }
 
 }

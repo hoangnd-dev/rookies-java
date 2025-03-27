@@ -9,6 +9,7 @@ import nashtech.rookies.jpa.service.RoleService;
 @Service
 public class RoleServiceImpl extends ServiceImpl<RoleEntity, String> implements RoleService {
 
+
     public RoleServiceImpl (RoleRepository repository) {
         super(repository);
     }
