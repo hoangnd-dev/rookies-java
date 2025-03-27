@@ -1,5 +1,6 @@
 package nashtech.rookies.jpa.repository.noboot;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
@@ -46,7 +48,8 @@ public abstract class GenericJPA<T extends IdEntity<?>, ID> {
         return Optional.ofNullable(em.find(this.clazz, id));
     }
 
-    public <S extends T> S save(S entity) {
+    public <S extends T> S save(@Nonnull S entity) {
+        Assert.notNull(entity, "Entity must not be null");
         return doInTransaction(entityManager -> {
             if (entity.isNew()) {
                 em.persist(entity);

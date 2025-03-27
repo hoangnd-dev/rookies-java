@@ -3,8 +3,8 @@ package nashtech.rookies.jpa.repository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
-import nashtech.rookies.jpa.entity.Author;
+import nashtech.rookies.jpa.entity.RoleEntity;
 
 @NoRepositoryBean
-public interface AuthorRepository extends CrudRepository<Author, Long> {
+public interface RoleRepository extends CrudRepository<RoleEntity, String> {
 }

@@ -12,22 +12,24 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import nashtech.rookies.jpa.repository.AuthorRepository;
-import nashtech.rookies.jpa.repository.BookRepository;
-import nashtech.rookies.jpa.repository.noboot.AuthorRepositoryNoBoot;
-import nashtech.rookies.jpa.repository.noboot.BookRepositoryNoBoot;
-import nashtech.rookies.jpa.service.AuthorService;
-import nashtech.rookies.jpa.service.BookService;
-import nashtech.rookies.jpa.service.impl.AuthorServiceImpl;
-import nashtech.rookies.jpa.service.impl.BookServiceImpl;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.ValidationMode;
 import lombok.SneakyThrows;
+import nashtech.rookies.jpa.repository.RoleRepository;
+import nashtech.rookies.jpa.repository.UserRepository;
+import nashtech.rookies.jpa.repository.noboot.RoleRepositoryNoBoot;
+import nashtech.rookies.jpa.repository.noboot.UserRepositoryNoBoot;
+import nashtech.rookies.jpa.service.RoleService;
+import nashtech.rookies.jpa.service.UserService;
+import nashtech.rookies.jpa.service.impl.RoleServiceImpl;
+import nashtech.rookies.jpa.service.impl.UserServiceImpl;
 
 @Configuration
 @Profile("jpa")
@@ -62,7 +64,7 @@ public class AppConfig {
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+    public JdbcTemplate jdbcTemplate (DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
 
@@ -89,23 +91,28 @@ public class AppConfig {
     }
 
     @Bean
-    AuthorRepository authorRepository () {
-        return new AuthorRepositoryNoBoot();
+    RoleRepository roleRepository () {
+        return new RoleRepositoryNoBoot();
     }
 
     @Bean
-    BookRepository bookRepository () {
-        return new BookRepositoryNoBoot();
+    UserRepository userRepository () {
+        return new UserRepositoryNoBoot();
     }
 
     @Bean
-    BookService bookService (BookRepository bookRepository) {
-        return new BookServiceImpl(bookRepository);
+    RoleService roleService () {
+        return new RoleServiceImpl(roleRepository());
     }
 
     @Bean
-    AuthorService authorService (AuthorRepository authorRepository) {
-        return new AuthorServiceImpl(authorRepository);
+    PasswordEncoder passwordEncoder () {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    UserService userService () {
+        return new UserServiceImpl(userRepository(), roleRepository(), passwordEncoder());
     }
 
 }

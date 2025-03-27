@@ -9,7 +9,7 @@ import nashtech.rookies.jpa.service.Service;
 
 public abstract class ServiceImpl<T, ID> implements Service<T, ID> {
 
-    private final CrudRepository<T, ID> repository;
+    protected final CrudRepository<T, ID> repository;
 
     ServiceImpl (CrudRepository<T, ID> repository) {
         this.repository = repository;
@@ -33,7 +33,7 @@ public abstract class ServiceImpl<T, ID> implements Service<T, ID> {
     }
 
     @Override
-    public void delete(ID id) {
+    public void delete (ID id) {
         this.repository.deleteById(id);
     }
 }

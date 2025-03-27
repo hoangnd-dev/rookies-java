@@ -12,9 +12,9 @@ http://xmlns.jcp.org/xml/ns/persistence_2_1.xsd">
             <property name="jakarta.persistence.sql-load-script-source"
                       value="initial-data.sql" />
 
-            <!-- Hibernate properties -->
-<!--            <property name="hibernate.show_sql" value="true"/>-->
-<!--            <property name="hibernate.format_sql" value="true"/>-->
+            <!-- Hibernate properties-->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
         </properties>
     </persistence-unit>
 </persistence>
