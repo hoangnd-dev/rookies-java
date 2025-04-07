@@ -2,24 +2,27 @@ package nashtech.rookies.jpa.service.impl;
 
 import java.util.Optional;
 
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import nashtech.rookies.jpa.entity.EntityBase;
+import nashtech.rookies.jpa.repository.Repository;
 import nashtech.rookies.jpa.service.Service;
 
-public abstract class ServiceImpl<T, ID> implements Service<T, ID> {
+@Transactional(readOnly = true)
+public abstract class ServiceImpl<T extends EntityBase<?>, ID> implements Service<T, ID> {
 
-    protected final CrudRepository<T, ID> repository;
+    protected final Repository<T, ID> repository;
 
-    ServiceImpl (CrudRepository<T, ID> repository) {
+    ServiceImpl (Repository<T, ID> repository) {
         this.repository = repository;
     }
 
     @Override
     @Transactional
     public T save (T entity) {
-        return this.repository.save(entity);
+        return repository.save(entity);
     }
+
 
     @Override
     public Optional<T> findOne (ID pk) {

@@ -89,6 +89,7 @@ public class JDBCApp {
                 }
             }
             employees1.forEach(log::info);
+            // how to load employee with employee_asset
         }
     }
 

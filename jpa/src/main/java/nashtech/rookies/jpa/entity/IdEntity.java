@@ -19,4 +19,6 @@ public abstract class IdEntity<P extends Serializable> implements EntityBase<P> 
     @EqualsAndHashCode.Include
     private P id;
 
+
+
 }

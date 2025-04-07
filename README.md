@@ -3,16 +3,25 @@
 ### Requirement
 - Java 21
 - Spring Boot 3.4.4
-- 
 
-### Run
 
-- JDBC
+
+### Setup
+
+Copy `.env.sample` to `.env`
+Change the value to your environment
+
+### JDBC
+H2 database
 ```shell
-# H2
 mvn -pl jpa package exec:java -Dexec.mainClass="nashtech.rookies.jpa.JDBCApp"
-# PG
+```
+
+Postgres database
+```shell
 mvn -pl jpa -P-h2,pg exec:java -Dexec.mainClass="nashtech.rookies.jpa.JDBCApp"
 ``` 
-- JPA
 - Spring JPA
+```shell
+mvn -pl jpa package exec:java -Dexec.mainClass=nashtech.rookies.jpa.SpringDataApplication 
+```
