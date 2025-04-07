@@ -33,16 +33,16 @@ import lombok.ToString;
        })
 @Getter
 @Setter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 @IdClass(UserProfileId.class)
 public class UserProfileEntity implements EntityBase<UserProfileId> {
 
     @Id
     @Pattern(regexp="^[a-z0-9]+(?:-[a-z0-9]+)*$", message="profile name must be slug")
-    @Column(name = "profile_name", length = 100)
+    @Column(name = "profile_name", length = 100, unique = true)
     private String profileName;
 
     @Enumerated(EnumType.STRING)
@@ -54,7 +54,7 @@ public class UserProfileEntity implements EntityBase<UserProfileId> {
     Set<String> hobbies;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", columnDefinition = "uuid")
     @Id
     private UserEntity user;
 

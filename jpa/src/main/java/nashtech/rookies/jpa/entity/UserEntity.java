@@ -1,8 +1,12 @@
 package nashtech.rookies.jpa.entity;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+
+import org.hibernate.proxy.HibernateProxy;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
@@ -26,7 +30,6 @@ import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.SecondaryTable;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -39,14 +42,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 @SecondaryTable(name = "users_ext", pkJoinColumns = @PrimaryKeyJoinColumn(name = "id"))
 @NamedEntityGraphs(
@@ -54,7 +56,7 @@ import lombok.ToString;
         @NamedEntityGraph(name = UserEntity.WITH_RULES_GRAPH,
                           attributeNodes = @NamedAttributeNode("roles")),
         @NamedEntityGraph(name = UserEntity.WITH_RULES_PROFILE,
-                          attributeNodes = @NamedAttributeNode("profile"))
+                          attributeNodes = @NamedAttributeNode("profiles"))
     }
 )
 public class UserEntity extends AuditEntity<UUID> {
@@ -68,7 +70,9 @@ public class UserEntity extends AuditEntity<UUID> {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "user_name", length = 36, updatable = false, unique = true)
+
+
+    @Column(name = "user_name", updatable = false, unique = true)
     private String userName;
 
     @Column(name = "password", length = 1024, nullable = false)
@@ -90,13 +94,14 @@ public class UserEntity extends AuditEntity<UUID> {
     @Column(name = "disabled", length = 3)
     private Boolean disabled = false;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
     @NotEmpty
-    private Set<UserProfileEntity> profiles;
+    @Builder.Default
+    private Set<UserProfileEntity> profiles = new HashSet<>();
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @ToString.Exclude
     @JoinColumn(name = "department_id")
     private DepartmentEntity department;
@@ -109,16 +114,17 @@ public class UserEntity extends AuditEntity<UUID> {
         inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<RoleEntity> roles;
 
-    @Column(name = "user_avatar", table = "users_ext", columnDefinition = "bytea")
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "user_avatar", table = "users_ext")
+    //@Lob
+    //@Basic(fetch = FetchType.LAZY)
     @ToString.Exclude
-    byte[] avatar;
+    String avatar;
 
 
     @Version
     @Builder.Default
     long version = 1;
+
 
 
     // Transient
@@ -127,4 +133,37 @@ public class UserEntity extends AuditEntity<UUID> {
         return String.format("%s %s", this.firstName, this.lastName);
     }
 
+    @Transient
+    public void addProfile(UserProfileEntity profile) {
+        profile.setUser(this);
+        this.profiles.add(profile);
+    }
+
+    @Override
+    public final boolean equals (Object o) {
+        if ( this == o ) {
+            return true;
+        }
+        if ( o == null ) {
+            return false;
+        }
+        Class<?> oEffectiveClass =
+            o instanceof HibernateProxy ? ((HibernateProxy) o)
+                .getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass =
+            this instanceof HibernateProxy ? ((HibernateProxy) this)
+                .getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if ( thisEffectiveClass != oEffectiveClass ) {
+            return false;
+        }
+        UserEntity that = (UserEntity) o;
+        return getId() != null && Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public final int hashCode () {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+                                                                       .getPersistentClass()
+                                                                       .hashCode() : getClass().hashCode();
+    }
 }

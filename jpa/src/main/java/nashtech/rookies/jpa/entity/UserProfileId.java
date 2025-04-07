@@ -8,9 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 
-@AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
@@ -19,4 +19,13 @@ public class UserProfileId implements Serializable {
     private UUID user;
     @EqualsAndHashCode.Include
     private String profileName;
+
+    public UserProfileId () {
+
+    }
+
+    public UserProfileId (UUID user, String profileName) {
+        this.user = user;
+        this.profileName = profileName;
+    }
 }
