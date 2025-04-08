@@ -14,12 +14,12 @@ Change the value to your environment
 ### JDBC
 H2 database
 ```shell
-mvn -pl jpa package exec:java -Dexec.mainClass="nashtech.rookies.jpa.JDBCApp"
+mvn -pl jpa exec:java -Dexec.mainClass="nashtech.rookies.jpa.JDBCApp"
 ```
 
 Postgres database
 ```shell
-mvn -pl jpa -P-h2,pg exec:java -Dexec.mainClass="nashtech.rookies.jpa.JDBCApp"
+mvn -pl jpa exec:java -Dexec.mainClass="nashtech.rookies.jpa.JPAApp"
 ``` 
 - Spring JPA
 ```shell
