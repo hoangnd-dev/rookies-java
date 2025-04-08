@@ -23,72 +23,70 @@ import jakarta.persistence.ValidationMode;
 public class CDIBoot {
 
     public static final class TransactionManager {
-        private final EntityManagerFactory       emf;
+        private final EntityManagerFactory emf;
         private final ThreadLocal<EntityManager> ems = new InheritableThreadLocal<>();
 
-        private Pair<EntityManager, Boolean> em () {
+        private Pair<EntityManager, Boolean> em() {
             boolean isNew = false;
-            if ( ems.get() == null ) {
+            if (ems.get() == null) {
                 ems.set(emf.createEntityManager());
                 isNew = true;
             }
             return Pair.of(ems.get(), isNew);
         }
 
-        public TransactionManager (EntityManagerFactory entityManagerFactory) {
+        public TransactionManager(EntityManagerFactory entityManagerFactory) {
             this.emf = entityManagerFactory;
         }
 
-        private void startTransaction (EntityManager entityManager) {
-            if ( !entityManager.getTransaction().isActive() ) {
+        private void startTransaction(EntityManager entityManager) {
+            if (!entityManager.getTransaction().isActive()) {
                 entityManager.getTransaction().begin();
             }
         }
 
         // Helper method to commit the transaction
-        private void commitTransaction (EntityManager entityManager) {
-            if ( entityManager.getTransaction().isActive() ) {
+        private void commitTransaction(EntityManager entityManager) {
+            if (entityManager.getTransaction().isActive()) {
                 entityManager.getTransaction().commit();
             }
         }
 
         // Helper method to rollback the transaction
-        private void rollbackTransaction (EntityManager entityManager) {
-            if ( entityManager.getTransaction().isActive() ) {
+        private void rollbackTransaction(EntityManager entityManager) {
+            if (entityManager.getTransaction().isActive()) {
                 entityManager.getTransaction().rollback();
             }
         }
 
         // Helper method to close the entity manager
-        private void closeEntityManager (EntityManager entityManager) {
-            if ( entityManager.isOpen() ) {
+        private void closeEntityManager(EntityManager entityManager) {
+            if (entityManager.isOpen()) {
                 entityManager.close();
             }
         }
 
-        public <R> R query (Function<EntityManager, R> func) {
+        public <R> R query(Function<EntityManager, R> func) {
             return func.apply(em().getFirst());
         }
 
-        public <R> R execute (Function<EntityManager, R> func) {
-            var emPro         = em();
+        public <R> R execute(Function<EntityManager, R> func) {
+            var emPro = em();
             var entityManager = emPro.getFirst();
-            var isNew         = emPro.getSecond();
+            var isNew = emPro.getSecond();
 
             try (entityManager) {
                 startTransaction(entityManager);
                 var r = func.apply(entityManager);
-                if ( isNew ) {
+                if (isNew) {
                     commitTransaction(entityManager);
                 }
                 return r;
-            }
-            catch (RuntimeException e) {
+            } catch (RuntimeException e) {
                 rollbackTransaction(entityManager);
                 throw e;
-            }
-            finally {
-                if ( isNew ) {
+            } finally {
+                if (isNew) {
                     closeEntityManager(entityManager);
                     ems.remove();
                 }
@@ -97,13 +95,20 @@ public class CDIBoot {
     }
 
     static class CDIConfig {
+        private EntityManagerFactory entityManagerFactory;
+        private DataSource dataSource;
+
+        CDIConfig() {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> this.destroy()));
+        }
+
         @Produces
-        Dotenv dotenv () {
+        Dotenv dotenv() {
             return Dotenv.load();
         }
 
         @Produces
-        DataSource dataSource (Dotenv dotenv) {
+        DataSource dataSource(Dotenv dotenv) {
             var config = new HikariConfig();
             config.setJdbcUrl(dotenv.get("datasource.url"));
             config.setUsername(dotenv.get("datasource.username"));
@@ -111,47 +116,63 @@ public class CDIBoot {
             config.addDataSourceProperty("cachePrepStmts", "true");
             config.addDataSourceProperty("prepStmtCacheSize", "250");
             config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-            return new HikariDataSource(config);
+            this.dataSource = new HikariDataSource(config);
+            return this.dataSource;
         }
 
         @Produces
-        public JdbcTemplate jdbcTemplate (DataSource dataSource) {
+        public JdbcTemplate jdbcTemplate(DataSource dataSource) {
             return new JdbcTemplate(dataSource);
         }
 
         @Produces
-        EntityManagerFactory entityManagerFactory (DataSource dataSource) {
+        EntityManagerFactory entityManagerFactory(DataSource dataSource) {
             var properties = Map.of(
-                "jakarta.persistence.nonJtaDataSource", dataSource,
-                "jakarta.persistence.validation.mode", ValidationMode.CALLBACK.name()
-            );
-            return Persistence.createEntityManagerFactory("jpa-demo", properties);
+                    "jakarta.persistence.nonJtaDataSource", dataSource,
+                    "jakarta.persistence.validation.mode", ValidationMode.CALLBACK.name());
+            entityManagerFactory = Persistence.createEntityManagerFactory("jpa-demo", properties);
+            return entityManagerFactory;
         }
 
         @Produces
-        TransactionManager transactionManager (EntityManagerFactory entityManagerFactory) {
+        TransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
             return new TransactionManager(entityManagerFactory);
         }
 
         @Produces
         @Default
-        EntityManager create (EntityManagerFactory factory) {
+        EntityManager create(EntityManagerFactory factory) {
             return factory.createEntityManager();
         }
 
-        @PreDestroy
-        public void destroy (EntityManagerFactory factory) {
-            System.out.println("close emf");
-            factory.close();
+        // @PreDestroy
+        public void destroy() {
+            // System.out.println("close emf");
+            // if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+            // entityManagerFactory.close();
+            // }
+            // if (this.dataSource != null && dataSource instanceof HikariDataSource
+            // hikariDataSource) {
+            // hikariDataSource.close();
+            // }
+
         }
+
+        // @PreDestroy
+        // public void shutdown() {
+        //     if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+        //         System.out.println("Closing EntityManagerFactory...");
+        //         entityManagerFactory.close();
+        //     }
+        // }
     }
 
-
-    public static <T> T with (Class<T> appClass) {
+    public static <T> T with(Class<T> appClass) {
 
         var instance = SeContainerInitializer.newInstance();
         try (var container = instance.addBeanClasses(appClass, CDIConfig.class).initialize()) {
             return container.select(appClass).get();
         }
+
     }
 }

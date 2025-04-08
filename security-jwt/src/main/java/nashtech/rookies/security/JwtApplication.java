@@ -18,9 +18,7 @@ import lombok.extern.log4j.Log4j2;
 import nashtech.rookies.jpa.SpringDataApplication;
 import nashtech.rookies.jpa.service.RoleService;
 import nashtech.rookies.security.dto.SignUpDto;
-import nashtech.rookies.security.entity.Role;
-import nashtech.rookies.security.repository.RoleRepository;
-import nashtech.rookies.security.service.UserService;
+import nashtech.rookies.security.service.AuthService;
 
 @SpringBootApplication
 @EnableTransactionManagement
@@ -36,7 +34,7 @@ public class JwtApplication {
     @Bean
     CommandLineRunner commandLineRunner (
         @Value("${admin.default.pass}") String initPass,
-        UserService userService,
+        AuthService authService,
         RoleService roleService,
         RoleRepository roleRepository) {
         return args -> {
@@ -48,11 +46,11 @@ public class JwtApplication {
 
             log.info("Roles {}", roles);
             var u1 = new SignUpDto("admin", initPass, rolesDefault);
-            var u2 = userService.signUp(u1);
+            var u2 = authService.signUp(u1);
             System.out.println(u2);
 
             var user = new SignUpDto("user", initPass, List.of("ROLE_USER"));
-            var userDb = userService.signUp(user);
+            var userDb = authService.signUp(user);
             System.out.println(userDb);
 
 //            Author author = new Author();

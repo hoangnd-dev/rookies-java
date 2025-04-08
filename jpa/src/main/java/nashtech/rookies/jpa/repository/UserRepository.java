@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -18,5 +19,7 @@ public interface UserRepository extends Repository<UserEntity, UUID> {
 
     UserEntity getUserWithDepartmentByUsernameJoinFetch (String username);
 
+    @EntityGraph(attributePaths = "roles")
+    Optional<UserEntity> findOneByUserName (String username);
 
 }

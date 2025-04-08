@@ -2,7 +2,10 @@ package nashtech.rookies.jpa.service.impl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -11,12 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.interceptor.Interceptors;
-import nashtech.rookies.jpa.config.AppConfig;
-import nashtech.rookies.jpa.config.TransactionHandler;
 import nashtech.rookies.jpa.entity.DepartmentEntity;
+import nashtech.rookies.jpa.entity.RoleEntity;
 import nashtech.rookies.jpa.entity.UserEntity;
 import nashtech.rookies.jpa.entity.UserProfileEntity;
 import nashtech.rookies.jpa.repository.DepartmentRepository;
@@ -30,11 +30,11 @@ import nashtech.rookies.jpa.service.UserService;
 @Transactional(readOnly = true)
 public class UserServiceImpl extends ServiceImpl<UserEntity, UUID> implements UserService {
 
-    private final UserRepository                userRepository;
-    private final RoleRepository  roleRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserRepository        userRepository;
+    private final RoleRepository        roleRepository;
+    private final PasswordEncoder       passwordEncoder;
     private final UserProfileRepository userProfileRepository;
-    private final DepartmentRepository departmentRepository;
+    private final DepartmentRepository  departmentRepository;
 
     @Inject
     public UserServiceImpl (UserRepository userRepository, RoleRepository roleRepository,
@@ -46,6 +46,11 @@ public class UserServiceImpl extends ServiceImpl<UserEntity, UUID> implements Us
         this.passwordEncoder = passwordEncoder;
         this.userProfileRepository = userProfileRepository;
         this.departmentRepository = departmentRepository;
+    }
+
+    @Override
+    public Optional<UserEntity> findUserByUsername (String username) {
+        return this.userRepository.findOneByUserName(username);
     }
 
     @Override
@@ -103,10 +108,17 @@ public class UserServiceImpl extends ServiceImpl<UserEntity, UUID> implements Us
     @Transactional
     public UserEntity addProfile (UUID userId, UserProfileEntity userProfileEntity) {
         return this.findOne(userId)
-            .map(u -> {
-                u.addProfile(userProfileEntity);
-                return this.save(u);
-            }).orElseThrow(() -> new RuntimeException("User not found"));
+                   .map(u -> {
+                       u.addProfile(userProfileEntity);
+                       return this.save(u);
+                   }).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Override
+    public List<RoleEntity> findRoleByCodes (List<String> roleCode) {
+        return StreamSupport
+            .stream(this.roleRepository.findAllById(roleCode).spliterator(), false)
+            .collect(Collectors.toList());
     }
 
 
