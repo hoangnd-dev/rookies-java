@@ -12,16 +12,15 @@ Copy `.env.sample` to `.env`
 Change the value to your environment
 
 ### JDBC
-H2 database
 ```shell
 mvn -pl jpa exec:java -Dexec.mainClass="nashtech.rookies.jpa.JDBCApp"
 ```
 
-Postgres database
+### JPA 
 ```shell
 mvn -pl jpa exec:java -Dexec.mainClass="nashtech.rookies.jpa.JPAApp"
 ``` 
-- Spring JPA
+### Spring JPA
 ```shell
 mvn -pl jpa package exec:java -Dexec.mainClass=nashtech.rookies.jpa.SpringDataApplication 
 ```
