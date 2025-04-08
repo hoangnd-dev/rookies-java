@@ -5,7 +5,7 @@ Entity Model
 title: Rookie Models
 ---
 erDiagram
-    USER ||--|{ USER_PROFILE : "has many profiles"
+    USER |o--|{ USER_PROFILE : "has many profiles"
     USER {
         uuid id PK
         string username UK

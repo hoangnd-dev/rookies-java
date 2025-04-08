@@ -27,7 +27,6 @@ public class JPAApp {
             em.persist(it);
             return it;
         });
-        System.out.println("============");
         System.out.println(it);
 
         var dbIt = entityManager.find(DepartmentEntity.class, it.getId());
@@ -37,10 +36,7 @@ public class JPAApp {
             em.merge(dbIt);
             return dbIt;
         });
-        System.out.println("=======");
         System.out.println(newIt);
-        System.out.println("=======");
-        System.out.println(newIt.equals(dbIt));
 
     }
 

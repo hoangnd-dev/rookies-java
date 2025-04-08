@@ -4,8 +4,6 @@
 - Java 21
 - Spring Boot 3.4.4
 
-
-
 ### Setup
 
 Copy `.env.sample` to `.env`

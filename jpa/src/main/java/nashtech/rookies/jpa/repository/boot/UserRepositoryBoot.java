@@ -25,8 +25,8 @@ public interface UserRepositoryBoot
     @Query("SELECT u from UserEntity u join fetch u.department where u.userName = :username")
     UserEntity getUserWithDepartmentByUsernameJoinFetch (String username);
 
-    //@EntityGraph(attributePaths = "department")
-    //UserEntity getUserWithDepartmentByDepartmentGraph (String username);
+    Optional<UserEntity> findOneByUserName (String username);
 
-    //Optional<UserEntity> findOneByUserName (String username);
+    @EntityGraph(attributePaths = "department")
+    UserEntity getUserWithDepartmentByDepartmentGraph (String username);
 }

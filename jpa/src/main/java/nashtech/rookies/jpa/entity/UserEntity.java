@@ -101,7 +101,7 @@ public class UserEntity extends AuditEntity<UUID> {
     private Set<UserProfileEntity> profiles = new HashSet<>();
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @JoinColumn(name = "department_id")
     private DepartmentEntity department;

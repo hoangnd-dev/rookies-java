@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
 import org.springframework.core.io.ClassPathResource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,7 +20,6 @@ import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-@State(Scope.Thread)
 public class JDBCApp {
 
     private final Dotenv       dotenv;
@@ -53,7 +49,6 @@ public class JDBCApp {
     }
 
     @SneakyThrows
-    @Benchmark
     public void run () {
         try (var conn = this.getConnection(this.dotenv)) {
             var file = new ClassPathResource("jdbc_data.json").getFile();
