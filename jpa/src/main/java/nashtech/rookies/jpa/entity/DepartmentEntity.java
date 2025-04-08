@@ -30,6 +30,9 @@ public class DepartmentEntity extends AuditEntity<Long> {
     @Column(name = "department_name", unique = true, nullable = false)
     String name;
 
+    @Column(name = "department_location")
+    String location;
+
     @Override
     public final boolean equals (Object o) {
         if ( this == o ) {
