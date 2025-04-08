@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -116,9 +114,7 @@ public class UserServiceImpl extends ServiceImpl<UserEntity, UUID> implements Us
 
     @Override
     public List<RoleEntity> findRoleByCodes (List<String> roleCode) {
-        return StreamSupport
-            .stream(this.roleRepository.findAllById(roleCode).spliterator(), false)
-            .collect(Collectors.toList());
+        return this.roleRepository.findAllByCodeIn(roleCode);
     }
 
 

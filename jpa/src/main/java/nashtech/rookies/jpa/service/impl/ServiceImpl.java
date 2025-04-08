@@ -23,7 +23,6 @@ public abstract class ServiceImpl<T extends EntityBase<?>, ID> implements Servic
         return repository.save(entity);
     }
 
-
     @Override
     public Optional<T> findOne (ID pk) {
         return this.repository.findById(pk);

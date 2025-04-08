@@ -3,12 +3,8 @@ package nashtech.rookies.jpa.entity;
 import java.util.List;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -28,11 +24,10 @@ import lombok.ToString;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RoleEntity  extends AuditEntity<String> {
+public class RoleEntity extends AuditEntity<Long> {
 
-    @Id
-    @Column(name = "role_code")
-    String id;
+    @Column(name = "role_code", unique = true, updatable = false)
+    String code;
 
     @Column(name = "role_name")
     String name;

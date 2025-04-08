@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,15 +34,15 @@ public class AuthController extends V1Rest {
         produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<JwtToken> signIn (@RequestBody @Valid SignInDto data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.username(), data.password());
-        var authUser = authenticationManager.authenticate(usernamePassword);
-        var accessToken = tokenProvider.generateAccessToken((User) authUser.getPrincipal());
+        var authUser         = authenticationManager.authenticate(usernamePassword);
+        var accessToken      = tokenProvider.generateAccessToken((UserDetails) authUser.getPrincipal());
         return ResponseEntity.ok(new JwtToken(accessToken));
     }
 
 
     @GetMapping("/me")
     ResponseEntity<String> me (Authentication authentication) {
-        if (authentication.getPrincipal() instanceof User user) {
+        if ( authentication.getPrincipal() instanceof UserDetails user ) {
             return ResponseEntity.ok(user.getUsername());
         }
         return ResponseEntity.badRequest().build();

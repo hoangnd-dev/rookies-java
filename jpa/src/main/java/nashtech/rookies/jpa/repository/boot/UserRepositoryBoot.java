@@ -28,5 +28,5 @@ public interface UserRepositoryBoot
     Optional<UserEntity> findOneByUserName (String username);
 
     @EntityGraph(attributePaths = "department")
-    UserEntity getUserWithDepartmentByDepartmentGraph (String username);
+    UserEntity getOneUserByUserName (String username);
 }

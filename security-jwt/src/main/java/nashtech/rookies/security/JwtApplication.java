@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import lombok.extern.log4j.Log4j2;
 import nashtech.rookies.jpa.SpringDataApplication;
+import nashtech.rookies.jpa.entity.RoleEntity;
 import nashtech.rookies.jpa.service.RoleService;
 import nashtech.rookies.security.dto.SignUpDto;
 import nashtech.rookies.security.service.AuthService;
@@ -23,47 +24,40 @@ import nashtech.rookies.security.service.AuthService;
 @SpringBootApplication
 @EnableTransactionManagement
 @EnableJpaAuditing
-@ComponentScan(value = { "nashtech.rookies" }, excludeFilters = { @ComponentScan.Filter(
-    type = FilterType.ASSIGNABLE_TYPE, classes = { SpringDataApplication.class }) }
+@ComponentScan(value = { "nashtech.rookies" }, excludeFilters = {
+    @ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE, classes = { SpringDataApplication.class })
+}
 )
-@EnableJpaRepositories({ "nashtech.rookies.jpa.repository", "nashtech.rookies.security.repository" })
+@EnableJpaRepositories({ "nashtech.rookies.jpa.repository" })
 @Log4j2
-@EntityScan({ "nashtech.rookies.security.entity", "nashtech.rookies.jpa.entity" })
+@EntityScan({ "nashtech.rookies.jpa.entity" })
 public class JwtApplication {
 
     @Bean
     CommandLineRunner commandLineRunner (
         @Value("${admin.default.pass}") String initPass,
         AuthService authService,
-        RoleService roleService,
-        RoleRepository roleRepository) {
+        RoleService roleService) {
+
         return args -> {
             var rolesDefault = List.of("ROLE_USER", "ROLE_ADMIN");
-            List<Role> roles = rolesDefault.stream()
-                .map(r -> Role.builder().roleName(r).build())
-                .map(roleRepository::save)
+            List<RoleEntity> roles = rolesDefault
+                .stream()
+                .map(r -> RoleEntity
+                    .builder()
+                    .code(r)
+                    .name(r)
+                    .build())
+                .map(roleService::save)
                 .toList();
 
             log.info("Roles {}", roles);
             var u1 = new SignUpDto("admin", initPass, rolesDefault);
-            var u2 = authService.signUp(u1);
-            System.out.println(u2);
+            authService.signUp(u1);
 
             var user = new SignUpDto("user", initPass, List.of("ROLE_USER"));
-            var userDb = authService.signUp(user);
-            System.out.println(userDb);
-
-//            Author author = new Author();
-//            author.setEmail("tech@yahoo.com");
-//            author.setName("this ny my name");
-//            AuthorDetail authorDetail = new AuthorDetail();
-//            authorDetail.setAddress("address");
-////        authorDetail.setAuthor(author);
-//            author.setAuthorDetail(authorDetail);
-//            roleService.save(author);
-//            log.info(author.getId());
-//            log.info(author.getAuthorDetail().getAddress());
-
+            authService.signUp(user);
         };
     }
 

@@ -1,7 +1,6 @@
 package nashtech.rookies.security.service;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +11,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import nashtech.rookies.jpa.entity.Gender;
 import nashtech.rookies.jpa.entity.UserEntity;
+import nashtech.rookies.jpa.entity.UserProfileEntity;
 import nashtech.rookies.jpa.service.UserService;
 import nashtech.rookies.security.dto.SignUpDto;
 import nashtech.rookies.security.exception.UserExistException;
@@ -29,7 +30,7 @@ public class AuthService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    UserDetails fromUser(UserEntity user) {
+    UserDetails fromUser (UserEntity user) {
         return new UserDetails() {
             @Override
             public Collection<? extends GrantedAuthority> getAuthorities () {
@@ -52,8 +53,8 @@ public class AuthService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername (String username) throws UsernameNotFoundException {
         return userService.findUserByUsername(username)
-            .map(this::fromUser)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                          .map(this::fromUser)
+                          .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Transactional
@@ -65,18 +66,27 @@ public class AuthService implements UserDetailsService {
 
         String encryptedPassword = passwordEncoder.encode(data.password());
 
-        var newUser = UserEntity.builder()
+        var newUser = UserEntity
+            .builder()
             .userName(data.username())
-            .password(data.password());
+            .email(data.username() + "@gmail.com")
+            .password(encryptedPassword);
 
         if ( !data.roles().isEmpty() ) {
             var userRoles = userService.findRoleByCodes(data.roles());
             if ( userRoles.size() != data.roles().size() ) {
                 throw new UserExistException("Role not found");
             }
-            newUser.roles(List.of(userRoles));
+            newUser.roles(userRoles);
         }
+        UserProfileEntity profileEntity = UserProfileEntity
+            .builder()
+            .profileName(data.username())
+            .gender(Gender.MALE)
+            .build();
+        UserEntity build = newUser.build();
+        build.addProfile(profileEntity);
 
-        return userRepository.save(newUser);
+        return this.fromUser(userService.save(build));
     }
 }

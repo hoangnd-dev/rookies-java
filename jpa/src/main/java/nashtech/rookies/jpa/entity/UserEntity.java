@@ -111,7 +111,7 @@ public class UserEntity extends AuditEntity<UUID> {
     @JoinTable(
         name = "user_role",
         joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id"))
+        inverseJoinColumns = @JoinColumn(name = "role_code", referencedColumnName = "role_code"))
     private List<RoleEntity> roles;
 
     @Column(name = "user_avatar", table = "users_ext")

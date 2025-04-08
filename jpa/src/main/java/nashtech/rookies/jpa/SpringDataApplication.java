@@ -170,14 +170,5 @@ public class SpringDataApplication {
         SpringApplication.exit(SpringApplication.run(SpringDataApplication.class, args), () -> 0);
     }
 
-    //public static void main (String[] args) {
-    //    Dotenv dotenv = Dotenv.load();
-    //    var app = new SpringApplication(SpringDataApplication.class);
-    //    app.addInitializers(context -> {
-    //        System.out.println(dotenv.get("datasource.url"));
-    //        context.getBeanFactory().registerSingleton("dotenv", dotenv);
-    //    });
-    //    app.run(args);
-    //}
 
 }

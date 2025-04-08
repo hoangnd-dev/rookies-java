@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.auth0.jwt.JWT;
@@ -21,13 +22,13 @@ public class TokenProvider {
         this.algorithm = Algorithm.HMAC256(jwtSecret);
     }
 
-    public String generateAccessToken (User user) {
+    public String generateAccessToken (UserDetails user) {
         try {
             return JWT.create()
-                .withSubject(user.getUsername())
-                .withClaim("username", user.getUsername())
-                .withExpiresAt(genAccessExpirationDate())
-                .sign(algorithm);
+                      .withSubject(user.getUsername())
+                      .withClaim("username", user.getUsername())
+                      .withExpiresAt(genAccessExpirationDate())
+                      .sign(algorithm);
         }
         catch (JWTCreationException exception) {
             throw new JWTCreationException("Error while generating token", exception);
@@ -37,9 +38,9 @@ public class TokenProvider {
     public String validateToken (String token) {
         try {
             return JWT.require(algorithm)
-                .build()
-                .verify(token)
-                .getSubject();
+                      .build()
+                      .verify(token)
+                      .getSubject();
         }
         catch (JWTVerificationException exception) {
             throw new JWTVerificationException("Error while validating token", exception);
