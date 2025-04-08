@@ -131,7 +131,7 @@ public class SpringDataApplication {
 
             var db = userService.findOne(userInDb.getId()).get();
             var b1 = db.getAvatar();
-            System.out.println(new String(b1));
+            log.info("{}", b1);
             var authorName = jdbcTemplate.query(
                 "SELECT users.user_name,users.disabled,users.version, users_ext.user_avatar FROM users left join " +
                 "users_ext on users_ext.id = users.id " +

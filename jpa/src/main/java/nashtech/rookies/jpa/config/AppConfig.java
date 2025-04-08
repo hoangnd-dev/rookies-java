@@ -25,7 +25,6 @@ public class AppConfig {
         config.setJdbcUrl(dotenv.get("datasource.url"));
         config.setUsername(dotenv.get("datasource.username"));
         config.setPassword(dotenv.get("datasource.password"));
-        config.setDriverClassName(dotenv.get("datasource.driverClassName"));
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
