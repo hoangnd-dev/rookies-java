@@ -199,7 +199,7 @@ public class CDIBoot {
 
         }
     }
-
+    @SuppressWarnings("unchecked")
     public static <T> T with (Class<T> appClass) {
         var instance  = SeContainerInitializer.newInstance();
         var container = instance.addBeanClasses(appClass, CDIConfig.class).initialize();

@@ -5,6 +5,7 @@ http://xmlns.jcp.org/xml/ns/persistence_2_1.xsd">
     <persistence-unit name="jpa-demo" transaction-type="RESOURCE_LOCAL">
         <description>JPA Demo</description>
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <class>nashtech.rookies.jpa.entity.UserProfileId</class>
         <class>nashtech.rookies.jpa.entity.DepartmentEntity</class>
         <class>nashtech.rookies.jpa.entity.UserEntity</class>
         <class>nashtech.rookies.jpa.entity.UserProfileEntity</class>
