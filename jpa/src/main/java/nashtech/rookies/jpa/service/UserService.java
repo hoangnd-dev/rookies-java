@@ -30,4 +30,6 @@ public interface UserService extends Service<UserEntity, UUID> {
     UserEntity addProfile(UUID userId, UserProfileEntity userProfileEntity);
 
     List<RoleEntity> findRoleByCodes (List<String> roleCode);
+
+    UserEntity getUser(UUID userId);
 }

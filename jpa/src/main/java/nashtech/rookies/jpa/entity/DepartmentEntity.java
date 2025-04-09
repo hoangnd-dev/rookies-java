@@ -7,6 +7,7 @@ import org.hibernate.proxy.HibernateProxy;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +33,11 @@ public class DepartmentEntity extends AuditEntity<Long> {
 
     @Column(name = "department_location")
     String location;
+
+    @Version
+    @Builder.Default
+    @Column(name = "version")
+    Integer version = 1;
 
     @Override
     public final boolean equals (Object o) {

@@ -129,7 +129,10 @@ public class SpringDataApplication {
             user.addProfile(userProfile2);
             var userInDb = userService.save(user);
 
-            var db = userService.findOne(userInDb.getId()).get();
+//            UserEntity db = userService.findOne(userInDb.getId()).get();
+            var db = userService.getUser(userInDb.getId());
+//            var db = userService.findUserByUsername(userInDb.getUserName()).get();
+            System.out.println(db.getDepartment().getName());
             var b1 = db.getAvatar();
             log.info("{}", b1);
             var authorName = jdbcTemplate.query(

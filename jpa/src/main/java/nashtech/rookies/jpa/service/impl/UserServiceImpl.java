@@ -117,5 +117,15 @@ public class UserServiceImpl extends ServiceImpl<UserEntity, UUID> implements Us
         return this.roleRepository.findAllByCodeIn(roleCode);
     }
 
+    @Override
+    public UserEntity getUser (UUID userId) {
+        System.out.println("GET USER");
+        Optional<UserEntity> byId = this.userRepository.findById(userId);
+        var u = byId.get();
+        System.out.println("Print department");
+        System.out.println(u.getDepartment().getName());
+        return u;
+    }
+
 
 }

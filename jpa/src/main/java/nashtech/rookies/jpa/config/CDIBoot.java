@@ -5,26 +5,33 @@ import java.util.function.Function;
 
 import javax.sql.DataSource;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.jboss.weld.environment.se.WeldContainer;
+import org.jboss.weld.environment.se.events.ContainerShutdown;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.cdimascio.dotenv.Dotenv;
-import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.ValidationMode;
-import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class CDIBoot {
 
     public static final class TransactionManager {
         private final EntityManagerFactory       emf;
-        private final ThreadLocal<EntityManager> ems = new InheritableThreadLocal<>();
+        private final ThreadLocal<EntityManager> ems = new ThreadLocal<>();
 
         private Pair<EntityManager, Boolean> em () {
             boolean isNew = false;
@@ -67,7 +74,14 @@ public class CDIBoot {
         }
 
         public <R> R query (Function<EntityManager, R> func) {
-            return func.apply(em().getFirst());
+            var em = em().getFirst();
+            try (em) {
+                return func.apply(em);
+            }
+            finally {
+                ems.remove();
+            }
+
         }
 
         public <R> R execute (Function<EntityManager, R> func) {
@@ -94,21 +108,11 @@ public class CDIBoot {
                 }
             }
         }
-
-        @PreDestroy
-        public void close () {
-            if ( this.emf.isOpen() ) {
-                this.emf.close();
-            }
-        }
     }
 
     static class CDIConfig {
-        private EntityManagerFactory entityManagerFactory;
-        private DataSource           dataSource;
 
         CDIConfig () {
-            Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
         }
 
         @Produces
@@ -125,74 +129,84 @@ public class CDIBoot {
             config.addDataSourceProperty("cachePrepStmts", "true");
             config.addDataSourceProperty("prepStmtCacheSize", "250");
             config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-            this.dataSource = new HikariDataSource(config);
-            return this.dataSource;
+            return new HikariDataSource(config);
         }
 
         @Produces
-        public JdbcTemplate jdbcTemplate (DataSource dataSource) {
+        JdbcTemplate jdbcTemplate (DataSource dataSource) {
             return new JdbcTemplate(dataSource);
         }
 
         @Produces
-        EntityManagerFactory entityManagerFactory (DataSource dataSource) {
+        EntityManagerFactory entityManagerFactory (DataSource dataSource, Dotenv dotenv) {
             var properties = Map.of(
                 "jakarta.persistence.nonJtaDataSource", dataSource,
                 "jakarta.persistence.validation.mode", ValidationMode.CALLBACK.name()
             );
-            entityManagerFactory = Persistence.createEntityManagerFactory("jpa-demo", properties);
-            return entityManagerFactory;
+            return Persistence.createEntityManagerFactory(dotenv.get("JPA_UNIT"), properties);
         }
 
-        //        @Produces
-        //        TransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-        //            return new TransactionManager(entityManagerFactory);
-        //        }
+        @Produces
+        TransactionManager transactionManager (EntityManagerFactory entityManagerFactory) {
+            return new TransactionManager(entityManagerFactory);
+        }
 
-        //        @Produces
-        //        @Default
-        //        EntityManager create(EntityManagerFactory factory) {
-        //            return factory.createEntityManager();
-        //        }
+        @Produces
+        @Default
+        EntityManager entityManager (EntityManagerFactory factory) {
+            return factory.createEntityManager();
+        }
 
-        @PreDestroy
-        public void destroy () {
-            // System.out.println("close emf");
-            // if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
-            // entityManagerFactory.close();
-            // }
-            if ( this.dataSource != null
 
-                 && dataSource instanceof HikariDataSource hikariDataSource ) {
-                System.out.println("Close data source");
-                hikariDataSource.close();
+        void stop (@Observes ContainerShutdown event,
+                   EntityManagerFactory entityManagerFactory,
+                   DataSource dataSource
+        ) {
+            entityManagerFactory.close();
+            if ( dataSource instanceof HikariDataSource hDs ) {
+                hDs.close();
             }
 
         }
-
-        // @PreDestroy
-        // public void shutdown() {
-        //     if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
-        //         System.out.println("Closing EntityManagerFactory...");
-        //         entityManagerFactory.close();
-        //     }
-        // }
     }
 
-    @SneakyThrows
+    static class MadeUpInterface implements MethodInterceptor {
+
+        private final WeldContainer container;
+
+        MadeUpInterface (WeldContainer container) {
+            this.container = container;
+        }
+
+        void close () {
+            this.container.select(EntityManagerFactory.class).get().close();
+            var ds = (HikariDataSource) this.container.select(DataSource.class).get();
+            ds.close();
+        }
+
+        @Override
+        public Object invoke (MethodInvocation invocation) throws Throwable {
+            if ( "run".equals(invocation.getMethod().getName()) ) {
+                log.info("APP Startup");
+            }
+            var o = invocation.getMethod().invoke(invocation.getThis(), invocation.getArguments());
+            if ( "run".equals(invocation.getMethod().getName()) ) {
+                this.close();
+                container.close();
+                log.info("APP Shutdown");
+            }
+            return o;
+
+        }
+    }
+
     public static <T> T with (Class<T> appClass) {
-
-        var instance = SeContainerInitializer.newInstance();
-        CDIConfig ds = null;
-        try (var container = instance.addBeanClasses(appClass, CDIConfig.class).initialize()) {
-            ds = container.select(CDIConfig.class).get();
-            return container.select(appClass).get();
-        } finally {
-            Thread.sleep(100);
-            if (ds != null && ds.dataSource instanceof HikariDataSource dataSource) {
-                dataSource.close();
-            }
-        }
-
+        var instance  = SeContainerInitializer.newInstance();
+        var container = instance.addBeanClasses(appClass, CDIConfig.class).initialize();
+        var app       = container.select(appClass).get();
+        var factory   = new ProxyFactory(app);
+        factory.addAdvice(new MadeUpInterface((WeldContainer) container));
+        return (T) factory.getProxy();
     }
+
 }

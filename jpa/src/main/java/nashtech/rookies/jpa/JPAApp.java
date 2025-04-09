@@ -32,9 +32,12 @@ public class JPAApp {
         var dbIt = entityManager.find(DepartmentEntity.class, it.getId());
         //        var dbIt = transactionManager.query(em -> em.find(DepartmentEntity.class, it.getId()));
         var newIt = transactionManager.execute(em -> {
-            dbIt.setName("new Name");
-            em.merge(dbIt);
-            return dbIt;
+            //            var u = em.find(DepartmentEntity.class, it.getId());
+            //            u.setName("new Name");
+            //            em.merge(u);
+            //            return u;
+            dbIt.setName("Name1");
+            return em.merge(dbIt);
         });
         System.out.println(newIt);
 

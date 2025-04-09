@@ -11,15 +11,10 @@ http://xmlns.jcp.org/xml/ns/persistence_2_1.xsd">
         <class>nashtech.rookies.jpa.entity.RoleEntity</class>
         <class>nashtech.rookies.jpa.entity.SetConverter</class>
         <class>nashtech.rookies.jpa.entity.BooleanToYNConverter</class>
-<!--        <exclude-unlisted-classes>false</exclude-unlisted-classes>-->
         <properties>
-
             <property name="jakarta.persistence.schema-generation.database.action" value="create"/>
-            <property name="eclipselink.logging.level" value="FINE"/>
             <property name="eclipselink.logging.level.sql" value="FINE"/>
             <property name="eclipselink.logging.parameters" value="true"/>
-<!--            <property name="jakarta.persistence.sql-load-script-source"-->
-<!--                      value="initial-data.sql" />-->
         </properties>
     </persistence-unit>
 </persistence>

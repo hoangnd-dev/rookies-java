@@ -19,7 +19,7 @@ public interface UserRepository extends Repository<UserEntity, UUID> {
 
     UserEntity getUserWithDepartmentByUsernameJoinFetch (String username);
 
-    @EntityGraph(attributePaths = "roles")
+    @EntityGraph(attributePaths = {"roles", "department"})
     Optional<UserEntity> findOneByUserName (String username);
 
 }
