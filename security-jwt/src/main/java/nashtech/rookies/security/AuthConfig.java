@@ -69,7 +69,7 @@ public class AuthConfig {
                     ,"/api-docs/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.POST, "/v1/auth/*").permitAll()
-                .requestMatchers(HttpMethod.POST, "/v1/admin").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/v1/admin").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
             .build();

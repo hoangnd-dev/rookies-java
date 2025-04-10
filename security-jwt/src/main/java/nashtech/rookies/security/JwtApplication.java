@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import lombok.extern.log4j.Log4j2;
 import nashtech.rookies.jpa.SpringDataApplication;
+import nashtech.rookies.jpa.config.AppConfig;
 import nashtech.rookies.jpa.entity.RoleEntity;
 import nashtech.rookies.jpa.service.RoleService;
 import nashtech.rookies.security.dto.SignUpDto;
@@ -26,7 +27,7 @@ import nashtech.rookies.security.service.AuthService;
 @EnableJpaAuditing
 @ComponentScan(value = { "nashtech.rookies" }, excludeFilters = {
     @ComponentScan.Filter(
-        type = FilterType.ASSIGNABLE_TYPE, classes = { SpringDataApplication.class })
+        type = FilterType.ASSIGNABLE_TYPE, classes = { SpringDataApplication.class, AppConfig.class })
 }
 )
 @EnableJpaRepositories({ "nashtech.rookies.jpa.repository" })

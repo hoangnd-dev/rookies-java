@@ -36,7 +36,8 @@ public class AppConfig {
         config.setJdbcUrl(dotenv.get("datasource.url"));
         config.setUsername(dotenv.get("datasource.username"));
         config.setPassword(dotenv.get("datasource.password"));
-        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("maximumPoolSize", 2);
+        config.addDataSourceProperty("cachePrepStmts", "false");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         return new HikariDataSource(config);

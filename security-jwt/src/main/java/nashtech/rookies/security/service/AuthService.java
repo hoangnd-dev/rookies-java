@@ -39,12 +39,12 @@ public class AuthService implements UserDetailsService {
 
             @Override
             public String getPassword () {
-                return user.getUserName();
+                return user.getPassword();
             }
 
             @Override
             public String getUsername () {
-                return user.getPassword();
+                return user.getUserName();
             }
         };
     }

@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.cdimascio.dotenv.Dotenv;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;
@@ -29,7 +30,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class CDIBoot {
 
-    public static final class TransactionManager {
+    public static class TransactionManager {
         private final EntityManagerFactory       emf;
         private final ThreadLocal<EntityManager> ems = new ThreadLocal<>();
 
@@ -121,23 +122,27 @@ public class CDIBoot {
         }
 
         @Produces
+//        @ApplicationScoped
         DataSource dataSource (Dotenv dotenv) {
             var config = new HikariConfig();
             config.setJdbcUrl(dotenv.get("datasource.url"));
             config.setUsername(dotenv.get("datasource.username"));
             config.setPassword(dotenv.get("datasource.password"));
-            config.addDataSourceProperty("cachePrepStmts", "true");
+            config.addDataSourceProperty("maximumPoolSize", 2);
+            config.addDataSourceProperty("cachePrepStmts", "false");
             config.addDataSourceProperty("prepStmtCacheSize", "250");
             config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
             return new HikariDataSource(config);
         }
 
         @Produces
+        @ApplicationScoped
         JdbcTemplate jdbcTemplate (DataSource dataSource) {
             return new JdbcTemplate(dataSource);
         }
 
         @Produces
+//        @ApplicationScoped
         EntityManagerFactory entityManagerFactory (DataSource dataSource, Dotenv dotenv) {
             var properties = Map.of(
                 "jakarta.persistence.nonJtaDataSource", dataSource,
@@ -147,6 +152,7 @@ public class CDIBoot {
         }
 
         @Produces
+//        @ApplicationScoped
         TransactionManager transactionManager (EntityManagerFactory entityManagerFactory) {
             return new TransactionManager(entityManagerFactory);
         }
@@ -180,8 +186,9 @@ public class CDIBoot {
 
         void close () {
             this.container.select(EntityManagerFactory.class).get().close();
-            var ds = (HikariDataSource) this.container.select(DataSource.class).get();
-            ds.close();
+//            var ds = (HikariDataSource) this.container.select(DataSource.class).get();
+
+//            ds.close();
         }
 
         @Override
@@ -202,6 +209,9 @@ public class CDIBoot {
     @SuppressWarnings("unchecked")
     public static <T> T with (Class<T> appClass) {
         var instance  = SeContainerInitializer.newInstance();
+//        try(var container = instance.addBeanClasses(appClass, CDIConfig.class).initialize()) {
+//            return app;
+        //        }
         var container = instance.addBeanClasses(appClass, CDIConfig.class).initialize();
         var app       = container.select(appClass).get();
         var factory   = new ProxyFactory(app);

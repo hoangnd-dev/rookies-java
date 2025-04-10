@@ -48,4 +48,9 @@ public class AuthController extends V1Rest {
         return ResponseEntity.badRequest().build();
     }
 
+    @GetMapping("/admin")
+    ResponseEntity<String> admin () {
+        return ResponseEntity.ok("You are admin");
+    }
+
 }
